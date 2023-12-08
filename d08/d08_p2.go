@@ -7,18 +7,29 @@ import (
 	"strings"
 )
 
-type camelCard struct {
-	play  string
-	class int
-	bet   int
-}
-
 type Move int64
 
 const (
 	Left Move = iota
 	Right
 )
+
+func GCD(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+func LCM(a, b int, integers ...int) int {
+	result := a * b / GCD(a, b)
+	for i := 0; i < len(integers); i++ {
+		result = LCM(result, integers[i])
+	}
+	return result
+}
 
 func MoveFromRune(c rune) Move {
 	switch c {
@@ -31,14 +42,17 @@ func MoveFromRune(c rune) Move {
 	}
 }
 
-func allValid(pts []string) bool {
-	for _, v := range pts {
-		if v[len(v)-1] != 'Z' {
-			return false
-		}
+func findSteps(adj map[string][]string, cur string, mov string, curMoveIdx int) int {
+	l := 0
+	for cur[len(cur)-1] != 'Z' {
+		l += 1
+		curMove := MoveFromRune(rune(mov[curMoveIdx]))
+		curMoveIdx = (curMoveIdx + 1) % len(mov)
+		cur = adj[cur][curMove]
 	}
-	return true
+	return l
 }
+
 func parseLine(line string) (node string, left string, right string) {
 	split := strings.Split(line, " = ")
 	node = split[0]
@@ -74,22 +88,20 @@ func main() {
 		adj[n] = []string{l, r}
 	}
 
-	res := 0
-	cur := []string{}
+	start_positions := []string{}
 	for k := range adj {
 		if k[len(k)-1] == 'A' {
-			cur = append(cur, k)
+			start_positions = append(start_positions, k)
 		}
 	}
-
-	cur_mov_idx := 0
-	for !allValid(cur) {
-		lr := MoveFromRune(rune(mov[cur_mov_idx]))
-		for i, v := range cur {
-			cur[i] = adj[v][lr]
+	res := 1
+	visited := make(map[string]int)
+	for _, k := range start_positions {
+		for k := range adj {
+			visited[k] = -1
 		}
-		res += 1
-		cur_mov_idx = (cur_mov_idx + 1) % len(mov)
+		cyc := findSteps(adj, k, mov, 0)
+		res = LCM(res, cyc)
 	}
 	fmt.Println(res)
 }
