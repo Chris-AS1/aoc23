@@ -7,12 +7,6 @@ import (
 	"strings"
 )
 
-type camelCard struct {
-	play  string
-	class int
-	bet   int
-}
-
 type Move int64
 
 const (
@@ -72,12 +66,8 @@ func main() {
 	for cur != "ZZZ" {
 		lr := MoveFromRune(rune(mov[cur_mov_idx]))
 		cur = adj[cur][lr]
-
 		res += 1
 		cur_mov_idx = (cur_mov_idx + 1) % len(mov)
 	}
-    /* for k, v := range adj {
-        fmt.Println(k, v)
-    } */
 	fmt.Println(res)
 }
